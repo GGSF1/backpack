@@ -19,6 +19,7 @@
 import {
   View,
   Platform,
+  TextInput,
 } from 'react-native';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
@@ -43,11 +44,12 @@ class AnimateAndFade extends Component {
 
     this.state = {
       visible: !this.props.onEnter,
+      showing: true,
     };
 
-    this.onToggle = this.onToggle.bind(this);
+    // this.onToggle = this.onToggle.bind(this);
     this.hide = this.hide.bind(this);
-    this.show = this.show.bind(this);
+    this.inistialShow = this.inistialShow.bind(this);
   }
 
   // Ok - I'll admit that this is a hack.
@@ -56,28 +58,35 @@ class AnimateAndFade extends Component {
   componentDidMount() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
-        this.show();
+        this.inistialShow();
       });
     });
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.show !== this.props.show) {
-      this.onToggle();
-    }
+    console.warn('NEXTPROPS!');
+    this.setState({
+      visible: nextProps.show,
+    });
+    //   this.inistialShow();
+    // } else if (!this.state.visible) {
+    // this.hide();
+    // }
+    // }
   }
 
-  onToggle() {
-    if (this.state.visible) {
-      this.hide();
-    } else if (!this.state.visible) {
-      this.show();
-    }
-  }
+  // onToggle() {
+  //   if (this.state.visible) {
+  //     this.hide();
+  //   } else if (!this.state.visible) {
+  //     this.inistialShow();
+  //   }
+  // }
 
-  show() {
+  inistialShow() {
     this.setState({
       visible: true,
+      showing: false,
     });
   }
 
@@ -88,45 +97,52 @@ class AnimateAndFade extends Component {
   }
 
   render() {
-    const { children } = this.props;
-    const showPlaceholder = !this.state.visible;
+    // const showPlaceholder = !this.state.visible && this.state.showing;
+    // console.warn(`showPlaceholder ${showPlaceholder}`);
+    console.warn(`this.state.visible ${this.state.visible}`);
 
     const fadingComponent = (
-      <TransitionGroup>
-        <FadeInOutTransition
-          inDuration={this.props.onEnter ? fadeDuration : 0}
-          outDuration={this.props.onLeave ? fadeDuration : 0}
-          inDelay={animateHeightDuration}
-          style={{ flex: 0 }}
-        >
-          {this.state.visible &&
-              children
-           }
-        </FadeInOutTransition>
-      </TransitionGroup>
+      <View
+        style={{ height: 100, width: 200, backgroundColor: 'pink' }}
+      >
+        <TransitionGroup>
+          <FadeInOutTransition
+            inDuration={700}
+            outDuration={700}
+            inDelay={animateHeightDuration}
+            style={{ flex: 0 }}
+          >
+            {this.props.children}
+          </FadeInOutTransition>
+        </TransitionGroup>
+      </View>
     );
 
 
     // While the expanding animation takes place, we render the child element
     // close to invisible. If we don't do this, the animate-height container
     // will take on height 0, and will never expand to allow the children to fade in
-    const placeholder = (
-      <View style={{ opacity: showPlaceholder ? 0.01 : 1 }}>
-        {showPlaceholder &&
-              children
-            }
-      </View>
-    );
+    // const placeholder = (
+    //   <View style={{ opacity: showPlaceholder ? 0.5 : 0.5 }}>
+    //     {showPlaceholder &&
+    //           children
+    //         }
+    //   </View>
+    // );
 
+
+    // <BpkAnimateHeight
+    //   duration={animateHeightDuration}
+    //   expanded
+    //   collapseDelay={fadeDuration}
+    //   >
+    //   {placeholder}
+    //   {fadingComponent}
+    // </BpkAnimateHeight>
     return (
-      <BpkAnimateHeight
-        duration={animateHeightDuration}
-        expanded={this.state.visible}
-        collapseDelay={fadeDuration}
-      >
-        {placeholder}
-        {fadingComponent}
-      </BpkAnimateHeight>
+      <View style={{ backgroundColor: 'blue', margin: 10 }}>
+        { fadingComponent }
+      </View>
     );
     /* eslint-enable */
   }
@@ -140,7 +156,7 @@ AnimateAndFade.propTypes = {
 };
 
 AnimateAndFade.defaultProps = {
-  show: false,
+  show: true,
   children: null,
 };
 
